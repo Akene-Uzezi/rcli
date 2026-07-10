@@ -1,22 +1,48 @@
-# rcli - Simple Rust CRUD CLI
+# rcli - Minimal HTTP Client CLI
 
-A lightweight command-line tool written in Rust for performing CRUD (Create, Read, Update, Delete) operations on posts via the JSONPlaceholder API. Perfect for learning async Rust, HTTP requests, and CLI development.
+A lightweight command-line HTTP client tool demonstrating CLI development in both **Rust** and **Go**.
 
-## Features
+## Overview
 
-- **GET**: Fetch a post by ID
-- **CREATE**: Create a new post with a title and body
-- **UPDATE**: Update an existing post with new title and body
-- **DELETE**: Delete a post by ID
+This repository contains two implementations of a simple HTTP client CLI:
+- **Rust version** (`src/main.rs`): Built with `clap` for argument parsing
+- **Go version** (`withgo/main.go`): Built with `cobra` for command handling
 
-All operations interact with the JSONPlaceholder public API (`https://jsonplaceholder.typicode.com/posts`).
+Both versions provide a minimal interface for making HTTP requests and inspecting responses.
+
+## Project Structure
+
+```
+rcli/
+├── src/
+│   └── main.rs           # Rust implementation using clap
+├── withgo/
+│   ├── main.go           # Go implementation using cobra
+│   ├── go.mod            # Go module definition
+│   └── go.sum            # Go dependencies lock file
+├── Cargo.toml            # Rust project manifest and dependencies
+├── Cargo.lock            # Rust dependency lock file
+├── .gitignore            # Git ignore file
+└── README.md             # This file
+```
+
+## Language Composition
+
+- **Rust**: 59%
+- **Go**: 41%
 
 ## Prerequisites
 
+### For Rust Version
 - **Rust** 1.56 or later
 - **Cargo** (comes with Rust)
 
-## Installation
+### For Go Version
+- **Go** 1.26.5 or later
+
+## Installation & Setup
+
+### Rust Version
 
 1. Clone the repository:
 ```bash
@@ -29,91 +55,89 @@ cd rcli
 cargo build --release
 ```
 
+3. Run:
+```bash
+cargo run -- --url "https://example.com" --method GET
+```
+
+### Go Version
+
+1. Navigate to the Go directory:
+```bash
+cd withgo
+```
+
+2. Build the project:
+```bash
+go build -o httpcli
+```
+
+3. Run:
+```bash
+./httpcli get "https://example.com"
+```
+
 ## Usage
 
-Run commands using `cargo run` followed by the command and arguments:
+### Rust Implementation
 
-### Get a Post
-Fetch a post by its ID:
 ```bash
-cargo run get 1
+cargo run -- --url <URL> [--method <METHOD>] [--verbose]
 ```
 
-### Create a Post
-Create a new post with a title and body:
+**Options:**
+- `--url, -u <URL>`: The target URL for the request (required)
+- `--method, -m <METHOD>`: HTTP method to use (default: GET)
+- `--verbose, -v`: Enable verbose logging output
+
+**Example:**
 ```bash
-cargo run create "My Title" "My post body text"
+cargo run -- --url "https://jsonplaceholder.typicode.com/posts/1" --method GET
 ```
 
-### Update a Post
-Update an existing post with a new title and body:
+### Go Implementation
+
 ```bash
-cargo run update 1 "Updated Title" "Updated body text"
+./httpcli get <URL>
 ```
 
-### Delete a Post
-Delete a post by its ID:
+**Subcommands:**
+- `get [url]`: Fetch content from a URL
+
+**Example:**
 ```bash
-cargo run delete 1
-```
-
-## Project Structure
-
-```
-rcli/
-├── src/
-│   └── main.rs          # Main CLI application logic
-├── Cargo.toml           # Project manifest and dependencies
-├── Cargo.lock           # Dependency lock file
-├── .gitignore           # Git ignore file
-└── README.md            # This file
+./httpcli get "https://jsonplaceholder.typicode.com/posts/1"
 ```
 
 ## Dependencies
 
-- **tokio** (v1.0): Async runtime with full feature set
+### Rust
+- **clap** (v4.4): Command-line argument parser with derive macros
+- **tokio** (v1.0): Async runtime (available with full feature set)
 - **reqwest** (v0.12): HTTP client library with JSON support
 - **serde** (v1.0): Serialization/deserialization framework
 - **serde_json** (v1.0): JSON support for serde
 
-## How It Works
+### Go
+- **cobra** (v1.10.2): Command CLI framework
+- **pflag** (v1.0.9): POSIX/GNU-style flags library
 
-The application:
-1. Parses command-line arguments to determine the operation
-2. Creates an async HTTP client using `reqwest`
-3. Constructs the appropriate HTTP request (GET, POST, PUT, DELETE)
-4. Serializes/deserializes JSON data using `serde`
-5. Displays formatted results to the console
+## Features
 
-## Example Output
-
-```
-$ cargo run get 1
---- READ (GET) SUCCESS ---
-Post {
-    id: Some(1),
-    title: "sunt aut facere repellat provident...",
-    body: "quia et suscipit...",
-    user_id: 1,
-}
-```
-
-## Notes
-
-- The CLI uses the free **JSONPlaceholder** API for testing CRUD operations
-- Post IDs in JSONPlaceholder range from 1 to 100
-- The API returns mock data; changes are not persisted
-- All network calls are handled asynchronously using Tokio
+- **Multi-language implementation**: Compare Rust and Go approaches to CLI development
+- **HTTP requests**: Make GET requests to any URL
+- **Error handling**: Graceful error reporting
+- **Command-line parsing**: Learn from two different CLI frameworks (clap vs cobra)
+- **Response inspection**: View HTTP status and response body
 
 ## Learning Resources
 
 This project demonstrates:
-- Async/await patterns in Rust with Tokio
-- HTTP requests with reqwest
-- JSON serialization with Serde
-- Command-line argument parsing
-- Error handling in async Rust
-- Pattern matching for CLI commands
+- **Rust**: Command-line argument parsing with clap, structured programming patterns
+- **Go**: Command framework with cobra, idiomatic Go patterns
+- HTTP request handling in both languages
+- CLI design patterns and best practices
+- Cross-language project structure and organization
 
 ## License
 
@@ -121,4 +145,4 @@ This project is open source and available under the MIT License.
 
 ## Contributing
 
-Feel free to fork, modify, and submit improvements!
+Feel free to fork, modify, and submit improvements! Contributions that enhance either implementation or add new features are welcome.
