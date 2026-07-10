@@ -2,40 +2,49 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
 func main() {
-	// Define local variables to hold the flag values
-	var url string
-	var method string
-	var verbose bool
-
-	// define the root command
+	// Define the root command
 	rootCmd := &cobra.Command{
 		Use:   "httpcli",
-		Short: "A simple http utility CLI tool",
-		Long:  `An HTTP client CLI built using the spf13/cobra framework to parse flags cleanly`,
-		// The run function executes when the command is invoked successfully
+		Short: "httpcli is a minimal HTTP client cli",
+	}
+
+	// Define the get subcommand
+	getCmd := &cobra.Command{
+		Use:   "get [url]",
+		Short: "fetch content from a url",
+		Args:  cobra.ExactArgs(1), // requires exactly one argument
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("--- Parsed Go (Cobra) Flags")
-			fmt.Printf("URL: %s\n", url)
-			fmt.Printf("Method: %s\n", method)
-			fmt.Printf("Verbose: %t\n", verbose)
+			url := args[0]
+			// perform the http get requires
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error making request %v\n", err)
+				os.Exit(1)
+			}
+			defer resp.Body.Close()
+
+			// read the response body
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error reading response %v\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("status: %s\n", resp.Status)
+			fmt.Println(string(body))
 		},
 	}
 
-	// Bind Flags to variables
-	// StringVarP takes: (pointer)
-	rootCmd.Flags().StringVarP(&url, "url", "u", "", "The target url for the request")
-	rootCmd.Flags().StringVarP(&method, "method", "m", "GET", "the http method to use")
-	rootCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "turn verbose on")
-
-	// tell cobra that the url flag is mandatory
-	rootCmd.MarkFlagRequired("url")
-
+	// add get command to root command and execute
+	rootCmd.AddCommand(getCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
