@@ -15,8 +15,26 @@ var headers map[string]any
 func main() {
 	// Define the root command
 	rootCmd := &cobra.Command{
-		Use:   "httpcli",
+		Use:   "httpcli [url]",
 		Short: "httpcli is a minimal HTTP client cli",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			url := args[0]
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error making request: %v\n", err)
+				os.Exit(1)
+			}
+			defer resp.Body.Close()
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error reading response %v\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("status: %s\n", resp.Status)
+			fmt.Println(string(body))
+		},
 	}
 
 	// Define the get subcommand
