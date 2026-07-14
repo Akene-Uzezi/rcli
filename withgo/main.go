@@ -43,7 +43,7 @@ func main() {
 
 	postCmd := &cobra.Command{
 		Use:   "post [url]",
-		Short: "make a post command",
+		Short: "make a post request",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			url := args[0]
@@ -84,11 +84,20 @@ func main() {
 		},
 	}
 
+	deleteCmd := &cobra.Command{
+		Use:   "del [url]",
+		Short: "make a delete request",
+		Args:  cobra.ExactArgs(1),
+		Run:   func(cmd *cobra.Command, args []string) {},
+	}
+
 	postCmd.Flags().StringSliceVarP(&headers, "headers", "H", []string{}, "HTTP headers to pass")
 	postCmd.Flags().StringVarP(&data, "data", "d", "", "the raw string data payload for the POST body")
-
+	deleteCmd.Flags().StringSliceVarP(&headers, "headers", "H", []string{}, "HTTP headers to pass")
+	deleteCmd.Flags().StringVarP(&data, "data", "d", "", "the raw string data payload for the REQUEST body")
 	// add get command to root command and execute
 	rootCmd.AddCommand(postCmd)
+	rootCmd.AddCommand(deleteCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
