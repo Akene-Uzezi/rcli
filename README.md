@@ -81,16 +81,68 @@ cargo run -- --url "https://example.com" --method GET
 
 ### Go Implementation
 
-```bash
-./httpcli get <URL>
-```
+The Go CLI tool supports multiple HTTP methods through subcommands:
 
-**Subcommands:**
-- `get [url]`: Fetch content from a URL
+#### Default GET Command (Root)
+
+Make a GET request by passing a URL directly:
+
+```bash
+./httpcli [url]
+```
 
 **Example:**
 ```bash
-./httpcli get "https://jsonplaceholder.typicode.com/posts/1"
+./httpcli "https://jsonplaceholder.typicode.com/posts/1"
+```
+
+**Output:**
+```
+status: 200 OK
+{response body}
+```
+
+#### POST Command
+
+Make a POST request with optional headers and data payload:
+
+```bash
+./httpcli post [url] [flags]
+```
+
+**Flags:**
+- `-H, --headers`: HTTP headers to pass (can be used multiple times)
+- `-d, --data`: Raw string data payload for the POST body
+
+**Examples:**
+```bash
+./httpcli post "https://jsonplaceholder.typicode.com/posts" \
+  -d '{"title":"Test","body":"Content"}' \
+  -H "Content-Type: application/json"
+```
+
+```bash
+./httpcli post "https://example.com/api" \
+  -d "key=value&foo=bar" \
+  -H "Content-Type: application/x-www-form-urlencoded"
+```
+
+#### DELETE Command
+
+Make a DELETE request with optional headers and data:
+
+```bash
+./httpcli del [url] [flags]
+```
+
+**Flags:**
+- `-H, --headers`: HTTP headers to pass (can be used multiple times)
+- `-d, --data`: Raw string data payload for the request body
+
+**Example:**
+```bash
+./httpcli del "https://jsonplaceholder.typicode.com/posts/1" \
+  -H "Authorization: Bearer token123"
 ```
 
 ### Rust Implementation
@@ -112,8 +164,9 @@ cargo run -- --url "https://jsonplaceholder.typicode.com/posts/1" --method GET
 ## Dependencies
 
 ### Go
-- **cobra** (v1.10.2): Command CLI framework
-- **pflag** (v1.0.9): POSIX/GNU-style flags library
+- **cobra** (v1.10.2): Command CLI framework for building CLI applications
+- **pflag** (v1.0.9): POSIX/GNU-style flags library (used by cobra)
+- **mousetrap** (v1.1.0): Windows console event handling (indirect dependency)
 
 ### Rust
 - **clap** (v4.4): Command-line argument parser with derive macros
@@ -125,7 +178,9 @@ cargo run -- --url "https://jsonplaceholder.typicode.com/posts/1" --method GET
 ## Features
 
 - **Multi-language implementation**: Compare Go and Rust approaches to CLI development
-- **HTTP requests**: Make GET requests to any URL
+- **Multiple HTTP methods**: Support for GET, POST, DELETE requests
+- **Custom headers**: Pass custom HTTP headers to requests
+- **Request payloads**: Send raw data in request bodies
 - **Error handling**: Graceful error reporting
 - **Command-line parsing**: Learn from two different CLI frameworks (cobra vs clap)
 - **Response inspection**: View HTTP status and response body
@@ -133,7 +188,7 @@ cargo run -- --url "https://jsonplaceholder.typicode.com/posts/1" --method GET
 ## Learning Resources
 
 This project demonstrates:
-- **Go**: Command framework with cobra, idiomatic Go patterns
+- **Go**: Command framework with cobra, subcommands, flags, idiomatic Go patterns
 - **Rust**: Command-line argument parsing with clap, structured programming patterns
 - HTTP request handling in both languages
 - CLI design patterns and best practices
