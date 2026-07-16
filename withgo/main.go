@@ -131,7 +131,38 @@ func main() {
 		Use:   "del [url]",
 		Short: "make a delete request",
 		Args:  cobra.ExactArgs(1),
-		Run:   func(cmd *cobra.Command, args []string) {},
+		Run: func(cmd *cobra.Command, args []string) {
+			url := args[0]
+			reqBody := strings.NewReader(data)
+			req, err := http.NewRequest("DELETE", url, reqBody)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to initialize request: %v\n", err)
+				os.Exit(1)
+			}
+			for _, h := range headers {
+				parts := strings.SplitN(h, ":", 2)
+				if len(parts) == 2 {
+					key := parts[0]
+					value := parts[0]
+					req.Header.Add(key, value)
+				}
+			}
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to execute request: %v\n", err)
+				os.Exit(1)
+			}
+			defer resp.Body.Close()
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to read put response: %v\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("status: %s\n", resp.Status)
+			fmt.Print(string(body))
+		},
 	}
 
 	postCmd.Flags().StringSliceVarP(&headers, "headers", "H", []string{}, "HTTP headers to pass")
@@ -141,9 +172,7 @@ func main() {
 	putCmd.Flags().StringSliceVarP(&headers, "headers", "H", []string{}, "HTTP headers to pass")
 	putCmd.Flags().StringVarP(&data, "data", "d", "", "the raw string data to be payload for the PUT request")
 	// add get command to root command and execute
-	rootCmd.AddCommand(postCmd)
-	rootCmd.AddCommand(deleteCmd)
-	rootCmd.AddCommand(putCmd)
+	rootCmd.AddCommand(postCmd, putCmd, deleteCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
