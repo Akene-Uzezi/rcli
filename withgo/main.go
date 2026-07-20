@@ -10,8 +10,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var headers map[string]any
+var (
+	headers []string
+	data    string
+)
 
+// the main function
 func main() {
 	// Define the root command
 	rootCmd := &cobra.Command{
@@ -20,7 +24,22 @@ func main() {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			url := args[0]
-			resp, err := http.Get(url)
+			reqBody := strings.NewReader(data)
+			req, err := http.NewRequest("GET", url, reqBody)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "failed to initialize request: %v\n", err)
+				os.Exit(1)
+			}
+			for _, h := range headers {
+				parts := strings.SplitN(h, ":", 2)
+				if len(parts) == 2 {
+					key := parts[0]
+					value := parts[1]
+					req.Header.Add(key, value)
+				}
+			}
+			client := &http.Client{}
+			resp, err := client.Do(req)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "error making request: %v\n", err)
 				os.Exit(1)
@@ -36,10 +55,6 @@ func main() {
 			fmt.Println(string(body))
 		},
 	}
-
-	// define variable to capture the flag values
-	var headers []string
-	var data string
 
 	postCmd := &cobra.Command{
 		Use:   "post [url]",
@@ -171,6 +186,8 @@ func main() {
 	deleteCmd.Flags().StringVarP(&data, "data", "d", "", "the raw string data payload for the DELETE request")
 	putCmd.Flags().StringSliceVarP(&headers, "headers", "H", []string{}, "HTTP headers to pass")
 	putCmd.Flags().StringVarP(&data, "data", "d", "", "the raw string data to be payload for the PUT request")
+	rootCmd.Flags().StringSliceVarP(&headers, "headers", "H", []string{}, "HTTP headers to pass")
+	rootCmd.Flags().StringVarP(&data, "data", "d", "", "data payload to be passed")
 	// add get command to root command and execute
 	rootCmd.AddCommand(postCmd, putCmd, deleteCmd)
 	if err := rootCmd.Execute(); err != nil {
